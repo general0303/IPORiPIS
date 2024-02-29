@@ -24,8 +24,6 @@ class ExampleApp(QtWidgets.QMainWindow, design.Ui_MainWindow):
         self.setupUi(self)
         self.pushButton.clicked.connect(self.send_mail)
         self.file_button.clicked.connect(self.browse_file)
-        server_name = self.comboBox.currentText()
-        self.server = smtplib.SMTP_SSL(settings[server_name]["host"], settings[server_name]["port"])
         self.filenames = []
 
     def send_mail(self):
@@ -36,9 +34,11 @@ class ExampleApp(QtWidgets.QMainWindow, design.Ui_MainWindow):
         msg.set_content(text)
         msg = self.create_attachment(msg)
         print(msg)
-        self.server.login(from_addr, password)
-        self.server.send_message(msg)
-        self.server.quit()
+        server_name = self.comboBox.currentText()
+        server = smtplib.SMTP_SSL(settings[server_name]["host"], settings[server_name]["port"])
+        server.login(from_addr, password)
+        server.send_message(msg)
+        server.quit()
         self.filenames = []
 
     def browse_file(self):

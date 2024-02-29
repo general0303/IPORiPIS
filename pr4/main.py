@@ -15,14 +15,14 @@ class ExampleApp(QtWidgets.QMainWindow, design.Ui_MainWindow):
         self.setupUi(self)
         self.pushButton.clicked.connect(self.send_mail)
         self.file_button.clicked.connect(self.browse_file)
-        self.server_name = self.comboBox.currentText()
         self.filenames = []
 
     def send_mail(self):
+        server_name = self.comboBox.currentText()
         data = {
             "email": self.email.text(), "subject": self.subject.text(), "text": self.mailText.toPlainText(),
             "from_addr": self.from_addr.text(), "password": self.lineEdit.text(),
-            "host": settings[self.server_name]["host"], "port": settings[self.server_name]["port"]
+            "host": settings[server_name]["host"], "port": settings[server_name]["port"]
         }
         requests.post("http://localhost:5000/", data=data,
                       files=[("file", open(x, 'rb')) for x in self.filenames] if len(self.filenames) > 0 else None)

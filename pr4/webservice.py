@@ -54,7 +54,7 @@ def create_attachment(msg, filenames):
                 file.set_payload(fp.read())
                 fp.close()
                 encoders.encode_base64(file)
-        file.add_header('Content-Disposition', 'attachment', filename=filepath.split("/")[-1])
+        file.add_header('Content-Disposition', 'attachment', filename=filepath.split(os.sep)[-1])
         msg.add_attachment(file)
     return msg
 
