@@ -50,9 +50,9 @@ class TablesApp(QtWidgets.QWidget, tables_list.Ui_Form):
         self.tablesList.clear()
         self.cur.execute("SELECT name FROM sqlite_master WHERE type='table'")
         for t in self.cur.fetchall():
-            table = t[0]
-            if table != "sqlite_sequence":
-                self.tablesList.addItem(table)
+            table_name = t[0]
+            if table_name != "sqlite_sequence":
+                self.tablesList.addItem(table_name)
 
     def execute_query(self):
         try:
@@ -130,7 +130,8 @@ class OneTableApp(QtWidgets.QWidget, table.Ui_Form):
         self.cur.execute(f'delete from {self.table_name}')
         self.conn.commit()
         columns = self.tableWidget.columnCount()
-        data = [[self.tableWidget.item(i, j).text() for j in range(columns)] for i in range(self.count)]
+        data = [[self.tableWidget.item(i, j).text() if self.tableWidget.item(i, j) is not None else None
+                 for j in range(columns)] for i in range(self.count)]
         for row in data:
             query = f"""insert into {self.table_name} values
             ({', '.join([f"'{d}'" for d in row])})"""
@@ -156,10 +157,12 @@ class CreateApp(QtWidgets.QDialog, create.Ui_Dialog):
     def save_table(self):
         rows = self.tableWidget.rowCount()
         columns = self.tableWidget.columnCount()
-        data = [[self.tableWidget.item(i, j).text() if self.tableWidget.item(i, j).text().upper() != "PRIMARY KEY"
+        print(rows, columns)
+        text = lambda x: "" if x is None else x.text().upper()
+        data = [[text(self.tableWidget.item(i, j)) if text(self.tableWidget.item(i, j)) != "PRIMARY KEY"
                  else "PRIMARY KEY AUTOINCREMENT UNIQUE NOT NULL"
-        if j > 0 and self.tableWidget.item(i, j - 1).text().upper() == "INTEGER" else
-        "PRIMARY KEY UNIQUE NOT NULL" for j in range(columns)] for i in range(rows)]
+                if j > 0 and text(self.tableWidget.item(i, j - 1)) == "INTEGER" else
+                "PRIMARY KEY UNIQUE NOT NULL" for j in range(columns)] for i in range(rows)]
         query = f"""
             create table {self.tableName.text()} (
                 {", ".join([" ".join([c for c in r]) for r in data])}
